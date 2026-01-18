@@ -6,7 +6,7 @@ EmpathAI is a React + TypeScript web application with cross-platform desktop (El
 
 ## Local Development
 
-**WEBSITE URL**: https://empath--ai.web.app/
+**WEBSITE URL**: **https://empath--ai.web.app/**
 
 The application runs locally with Vite development server for the frontend and FastAPI for the backend. Desktop and mobile apps are available for Windows and Android respectively.
 
@@ -582,6 +582,6 @@ For licensing inquiries, please contact the project maintainer.
 
 ---
 
-**Built with 💜 for those who need emotional, mental, and legal support.**
+**Built by [THARUN P](https://www.linkedin.com/in/tharun-p-4146b4318/) from [AlgoNomad](https://github.com/tharun242005)**
 
 © 2025 EmpathAI. All rights reserved.

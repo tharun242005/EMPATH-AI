@@ -582,6 +582,6 @@ For licensing inquiries, please contact the project maintainer.
 
 ---
 
-**Built by [THARUN P](https://www.linkedin.com/in/tharun-p-4146b4318/) from [AlgoNomad](https://github.com/tharun242005)**
+**Built by [THARUN P](https://www.linkedin.com/in/tharun-p-4146b4318/) from [EMPATH-AI](https://github.com/tharun242005)**
 
 © 2025 EmpathAI. All rights reserved.

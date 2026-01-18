@@ -140,7 +140,7 @@ npm run dev
 Vite will start the development server at `http://localhost:3000`. Open it in your browser.
 
 7. **Build for production:**
-
+ 
 ```bash
 npm run build
 ```

@@ -1,0 +1,1 @@
+C:\Users\run40\Downloads\EmpathAI Phase 4 Enhancements\WinBridge\obj\Debug\net8.0-windows10.0.22621.0\win-x64\EmpathAI.WinBridge.csproj.AssemblyReference.cache

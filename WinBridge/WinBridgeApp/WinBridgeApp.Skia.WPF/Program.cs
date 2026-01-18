@@ -1,0 +1,3 @@
+namespace WinBridgeApp.Skia.Gtk
+{
+}

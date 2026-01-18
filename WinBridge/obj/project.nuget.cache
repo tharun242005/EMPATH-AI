@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "ejBKWmlOG1s=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\run40\\Downloads\\EmpathAI Phase 4 Enhancements\\WinBridge\\EmpathAI.WinBridge.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\run40\\.nuget\\packages\\microsoft.windows.sdk.buildtools\\10.0.22621.1\\microsoft.windows.sdk.buildtools.10.0.22621.1.nupkg.sha512",
+    "C:\\Users\\run40\\.nuget\\packages\\microsoft.windowsappsdk\\1.4.231115000\\microsoft.windowsappsdk.1.4.231115000.nupkg.sha512",
+    "C:\\Users\\run40\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.19041.56\\microsoft.windows.sdk.net.ref.10.0.19041.56.nupkg.sha512"
+  ],
+  "logs": []
+}

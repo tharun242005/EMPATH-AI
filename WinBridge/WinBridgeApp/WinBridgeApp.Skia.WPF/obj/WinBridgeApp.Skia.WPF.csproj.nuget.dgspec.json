@@ -1,0 +1,85 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\run40\\Downloads\\EmpathAI Phase 4 Enhancements\\WinBridge\\WinBridgeApp\\WinBridgeApp.Skia.WPF\\WinBridgeApp.Skia.WPF.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\run40\\Downloads\\EmpathAI Phase 4 Enhancements\\WinBridge\\WinBridgeApp\\WinBridgeApp.Skia.WPF\\WinBridgeApp.Skia.WPF.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\run40\\Downloads\\EmpathAI Phase 4 Enhancements\\WinBridge\\WinBridgeApp\\WinBridgeApp.Skia.WPF\\WinBridgeApp.Skia.WPF.csproj",
+        "projectName": "WinBridgeApp.Skia.WPF",
+        "projectPath": "C:\\Users\\run40\\Downloads\\EmpathAI Phase 4 Enhancements\\WinBridge\\WinBridgeApp\\WinBridgeApp.Skia.WPF\\WinBridgeApp.Skia.WPF.csproj",
+        "packagesPath": "C:\\Users\\run40\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\run40\\Downloads\\EmpathAI Phase 4 Enhancements\\WinBridge\\WinBridgeApp\\WinBridgeApp.Skia.WPF\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\run40\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.0": {
+            "targetAlias": "netstandard2.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "netstandard2.0": {
+          "targetAlias": "netstandard2.0",
+          "dependencies": {
+            "Microsoft.Extensions.Logging.Console": {
+              "target": "Package",
+              "version": "[5.0.0, )"
+            },
+            "NETStandard.Library": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[2.0.3, )",
+              "autoReferenced": true
+            },
+            "Uno.UI.Adapter.Microsoft.Extensions.Logging": {
+              "target": "Package",
+              "version": "[4.7.56, )"
+            },
+            "Uno.UI.RemoteControl": {
+              "target": "Package",
+              "version": "[4.7.56, )"
+            },
+            "Uno.UI.Skia.Wpf": {
+              "target": "Package",
+              "version": "[4.7.56, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.415\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

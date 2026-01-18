@@ -1,0 +1,21 @@
+{
+  "solution": {
+    "path": "WinBridgeApp.sln",
+    "projects": [
+		"WinBridgeApp.Shared\\WinBridgeApp.Shared.shproj",
+
+		"WinBridgeApp.Droid\\WinBridgeApp.Droid.csproj",
+
+		"WinBridgeApp.iOS\\WinBridgeApp.iOS.csproj",
+
+
+		"WinBridgeApp.Wasm\\WinBridgeApp.Wasm.csproj",
+
+		"WinBridgeApp.macOS\\WinBridgeApp.macOS.csproj",
+
+		"WinBridgeApp.Skia.Gtk\\WinBridgeApp.Skia.Gtk.csproj",
+
+		"WinBridgeApp.Skia.Linux.FrameBuffer\\WinBridgeApp.Skia.Linux.FrameBuffer.csproj",
+    ]
+  }
+}

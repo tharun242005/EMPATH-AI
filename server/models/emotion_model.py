@@ -11,7 +11,7 @@ from typing import Dict
 class EmotionModel:
     """Emotion detection using Hugging Face pre-trained model."""
     
-    MODEL_NAME = "j-hartmann/emotion-english-distilroberta-base"
+    MODEL_NAME = "./models/emotion_finetuned"
     
     # Emotion labels from the model
     EMOTION_LABELS = [
@@ -30,8 +30,8 @@ class EmotionModel:
         "sadness": "sad",
         "anger": "angry",
         "fear": "fear",
-        "surprise": "calm",  # Map surprise to calm
-        "disgust": "angry",  # Map disgust to angry
+        "surprise": "calm",
+        "disgust": "angry",
         "neutral": "neutral"
     }
     
@@ -89,12 +89,17 @@ class EmotionModel:
             outputs = self.model(**inputs)
             predictions = torch.nn.functional.softmax(outputs.logits, dim=-1)
         
-        # Get top emotion
         top_prediction = torch.argmax(predictions, dim=-1).item()
-        confidence = predictions[0][top_prediction].item()
+        
+        # ✅ SAFETY PATCH (no behavior change)
+        if top_prediction < len(self.EMOTION_LABELS):
+            confidence = predictions[0][top_prediction].item()
+            detected_emotion_label = self.EMOTION_LABELS[top_prediction]
+        else:
+            confidence = float(torch.max(predictions).item())
+            detected_emotion_label = "neutral"
         
         # Map to our emotion system
-        detected_emotion_label = self.EMOTION_LABELS[top_prediction]
         mapped_emotion = self.EMOTION_MAPPING.get(
             detected_emotion_label,
             "neutral"
@@ -114,4 +119,3 @@ class EmotionModel:
         """Convenience API: returns a capitalized emotion label for external callers."""
         result = self.detect(text)
         return result["emotion"].capitalize()
-

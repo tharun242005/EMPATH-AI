@@ -75,174 +75,97 @@ The application runs locally with Vite development server for the frontend and F
 
 ### Prerequisites
 
-- **Node.js LTS** (v18 or higher recommended) and npm installed:
+- **Node.js LTS** (v18 or higher recommended) and npm: `node -v` & `npm -v`
+- **Python 3.11+** and pip: `python --version` & `pip --version`
+- **Google Gemini API Key** (optional) – Get from [Google AI Studio](https://makersuite.google.com/app/apikey)
 
-```bash
-node -v
-npm -v
-```
+### Quick Start (Single-Command from Root)
 
-- **Python 3.11+** and pip installed:
+1. **Install all dependencies:**
+   ```bash
+   npm run install:all
+   ```
 
-```bash
-python --version
-pip --version
-```
+2. **Start the backend server (FastAPI):**
+   ```bash
+   npm run dev:server
+   ```
+   *Runs at `http://127.0.0.1:8000`*
 
-- **Google Gemini API Key** – Get your API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+3. **Start the frontend client (React + Vite):**
+   ```bash
+   npm run dev
+   ```
+   *Runs at `http://127.0.0.1:3000`*
 
-### Installation
-
-1. **Clone the repository** or navigate to the project directory:
-
-```bash
-cd "EmpathAI Phase 4 Enhancements"
-```
-
-2. **Install frontend dependencies:**
-
-```bash
-npm install
-```
-
-3. **Install backend dependencies:**
-
-```bash
-pip install -r requirements.txt
-```
-
-4. **Set up environment variables:**
-
-   Create a `.env` file in the project root (same directory as `server/`):
-
-```bash
-GEMINI_API_KEY=your_gemini_api_key_here
-PORT=8000
-```
-
-   For Supabase authentication (optional), update `src/utils/supabase/info.tsx` with your project details.
-
-5. **Start the backend server:**
-
-```bash
-cd server
-python app.py
-```
-
-The backend will start at `http://localhost:8000`.
-
-6. **Start the frontend development server:**
-
-```bash
-npm run dev
-```
-
-Vite will start the development server at `http://localhost:3000`. Open it in your browser.
-
-7. **Build for production:**
- 
-```bash
-npm run build
-```
-
-The build output will be in the `build/` directory, ready for deployment.
-
----
-
-## Environment Variables
-
-Create a `.env` file in the project root with the following variables:
-
-```bash
-# Google Gemini API Key (required for AI responses)
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Backend server port (optional, defaults to 8000)
-PORT=8000
-```
-
-**Security Notes:**
-
-- Never commit actual keys to version control
-- Use environment variables or secure configuration for sensitive data
-- Restrict API keys appropriately in Google AI Studio dashboard
+4. **Build client for production:**
+   ```bash
+   npm run build
+   ```
 
 ---
 
 ## Project Structure
 
 ```
-EmpathAI Phase 4 Enhancements/
-├── src/
-│   ├── App.tsx                      # Main application component and routing
-│   ├── main.tsx                     # React entry point
-│   ├── index.css                    # Global styles
-│   ├── components/
-│   │   ├── ConsentModal.tsx         # Privacy consent dialog
-│   │   ├── EmotionBadge.tsx         # Emotion display component
-│   │   ├── EmotionParticles.tsx     # Animated particle effects
-│   │   ├── FloatingOrbs.tsx         # Background floating elements
-│   │   ├── Heart3D.tsx              # 3D heart visualization
-│   │   ├── MessageBubble.tsx        # Chat message component
-│   │   ├── MessageRipple.tsx        # Ripple animation effects
-│   │   ├── Navbar.tsx               # Navigation bar
-│   │   ├── Footer.tsx               # Footer component
-│   │   ├── ParticleWaves.tsx        # Background particle waves
-│   │   ├── SendButton.tsx           # Send button with animations
-│   │   ├── TypingIndicator.tsx      # AI typing indicator
-│   │   ├── VoiceAssistant.tsx       # Voice input/output component
-│   │   └── ui/                      # Reusable UI components (Radix UI)
-│   ├── pages/
-│   │   ├── Home.tsx                 # Landing page with hero section
-│   │   ├── Chat.tsx                 # Main chat interface
-│   │   ├── Legal.tsx                # Legal resources and IPC sections
-│   │   ├── Settings.tsx             # User settings page
-│   │   ├── Login.tsx                # User login component
-│   │   ├── Signup.tsx               # User registration component
-│   │   ├── PrivacyPolicy.tsx        # Privacy policy page
-│   │   ├── TermsConditions.tsx      # Terms of service page
-│   │   └── ResetPassword.tsx        # Password reset page
-│   ├── context/
-│   │   └── AuthContext.tsx          # Authentication context provider
-│   ├── utils/
-│   │   ├── chatStorage.ts           # Local chat session management
-│   │   ├── notificationMonitor.ts   # Browser notification monitoring
-│   │   └── supabase/
-│   │       └── info.tsx             # Supabase configuration
-│   ├── lib/
-│   │   └── supabase.ts              # Supabase client setup
-│   └── styles/
-│       └── globals.css              # Global styles and theme
-├── server/
-│   ├── app.py                       # Main FastAPI application
-│   ├── models/
-│   │   ├── emotion_model.py         # Emotion detection model
-│   │   └── harassment_model.py      # Harassment detection model
-│   ├── utils/
-│   │   ├── generate_response.py     # AI response generation
-│   │   ├── logger.py                # Analytics and incident logging
-│   │   └── notifier.py              # Notification utilities
-│   ├── legal/
-│   │   └── indian_laws.json         # IPC sections and legal data
-│   └── logs/
-│       ├── analytics_logs.json      # Analytics logs
-│       └── interactions.log         # Interaction logs
-├── desktop/                         # Electron desktop application
+EMPATH-AI/
+├── client/                          # React + Vite Frontend Web Application
 │   ├── src/
-│   │   ├── main.ts                  # Main Electron process
-│   │   ├── win-notifications.ts     # Windows notification bridge
-│   │   └── dev.ts                   # Development runner
-│   ├── winbridge/                   # Windows notification bridge DLL location
-│   ├── package.json                 # Electron app dependencies
-│   └── README.md                    # Desktop app setup guide
-├── mobile/                          # React Native mobile application
-│   ├── android/
-│   │   └── app/src/main/java/com/empathaimobile/notifications/
-│   │       └── EmpathNotificationService.kt  # Android notification listener
-│   ├── App.tsx                      # React Native app entry
-│   ├── package.json                 # React Native dependencies
-│   └── README.md                    # Mobile app setup guide
-├── shared/                          # Shared TypeScript code
+│   │   ├── App.tsx                  # Main routes & page router
+│   │   ├── main.tsx                 # React entry point
+│   │   ├── index.css                # Global styles & Tailwind utilities
+│   │   ├── components/              # UI components (3D Heart, Chat, Voice, Badges)
+│   │   ├── pages/                   # Pages (Home, Chat, Legal, Settings, Auth)
+│   │   ├── context/                 # Auth & App state contexts
+│   │   ├── utils/                   # Client utilities (chatStorage, notificationMonitor)
+│   │   ├── lib/                     # Supabase client helpers
+│   │   └── styles/                  # Theme & animation styles
+│   ├── public/                      # Service worker, icons & manifest
+│   ├── index.html                   # HTML entry
+│   ├── vite.config.ts               # Vite configuration
+│   └── package.json                 # Frontend dependencies
+│
+├── server/                          # FastAPI Backend Server & ML Engine
+│   ├── app.py                       # Main FastAPI server & REST API
+│   ├── requirements.txt             # Python backend dependencies
+│   ├── models/                      # Emotion & Harassment detection models
+│   │   ├── emotion_model.py
+│   │   ├── harassment_model.py
+│   │   ├── emotion_finetuned/
+│   │   └── harassment_finetuned/
+│   ├── legal/                       # Indian Penal Code (IPC) legal database
+│   │   └── indian_laws.json
+│   ├── utils/                       # AI generator, incident logger & alerts
+│   │   ├── generate_response.py
+│   │   ├── logger.py
+│   │   └── notifier.py
+│   └── logs/                        # Analytics & incident logs
+│
+├── database/                        # Database Schemas & Migrations
+│   ├── schemas/                     # SQL schemas (kv_store.sql, schema.sql)
+│   ├── migrations/                  # Database migration scripts
+│   └── functions/                   # Supabase serverless edge functions
+│
+├── desktop/                         # Electron Desktop Application
+│   ├── WinBridge/                   # C# UWP Native Windows Notification Listener
+│   ├── src/                         # Main process & tray integration
+│   ├── package.json
+│   └── README.md
+│
+├── mobile/                          # React Native Mobile Companion
+│
+├── shared/                          # Shared TypeScript types & helper functions
+│   ├── backend.ts
+│   └── harassment.ts
+│
+├── docs/                            # Documentation, Research Paper & Diagrams
+│   ├── EMPATH_AI_RESEARCH_PAPER.pdf
+│   ├── assets/                      # Architecture & UI screenshots
+│   └── reports/                     # Historical changelogs & fix summaries
+│
+├── package.json                     # Monorepo root workspace scripts
+└── README.md                        # Project overview & documentation
+```
 │   ├── harassment.ts                # Harassment severity detection logic
 │   └── backend.ts                   # Backend API client utilities
 ├── WinBridge/                       # C# UWP notification bridge

@@ -3,7 +3,15 @@ EmpathAI Backend - FastAPI Server
 Main application file for emotion detection, harassment detection, and AI response generation.
 """
 
+import sys
 import os
+
+# Ensure stdout and stderr handle utf-8 safely on Windows
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 import time
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -62,7 +70,7 @@ async def debug_response():
     return {
         "has_generate_method": has_generate,
         "available_methods": methods,
-        "gemini_available": getattr(response_generator, 'available', 'Unknown')
+        "gemini_available": getattr(response_generator, 'available', False)
     }
 
 @app.on_event("startup")
@@ -70,35 +78,34 @@ async def startup_event():
     """Initialize models on server startup for faster response times."""
     global emotion_model, harassment_model, response_generator, harassment_logger, ipc_data
     
-    print("🚀 Initializing EmpathAI models...")
+    print("[INIT] Initializing EmpathAI models...")
     
     try:
         emotion_model = EmotionModel()
-        print("✅ Emotion model loaded")
+        print("[OK] Emotion model loaded")
     except Exception as e:
-        print(f"❌ Error loading emotion model: {e}")
-        raise
+        print(f"[WARN] Error loading emotion model: {e}")
+        emotion_model = EmotionModel()
     
     try:
         harassment_model = HarassmentModel()
-        print("✅ Harassment model loaded")
+        print("[OK] Harassment model loaded")
     except Exception as e:
-        print(f"❌ Error loading harassment model: {e}")
-        raise
+        print(f"[WARN] Error loading harassment model: {e}")
+        harassment_model = HarassmentModel()
     
     try:
         response_generator = ResponseGenerator()
-        print("✅ Response generator initialized")
+        print("[OK] Response generator initialized")
     except Exception as e:
-        print(f"❌ CRITICAL: Response generator failed: {e}")
-        print("🚨 Gemini is REQUIRED. Server cannot start without it.")
-        raise  # This will stop the server if Gemini fails
+        print(f"[WARN] Response generator notice: {e}")
+        response_generator = ResponseGenerator()
     
     try:
         harassment_logger = HarassmentLogger()
-        print("✅ Harassment logger initialized")
+        print("[OK] Harassment logger initialized")
     except Exception as e:
-        print(f"⚠️  Warning: Logger error: {e}")
+        print(f"[WARN] Logger error: {e}")
 
     # Load IPC law database
     try:
@@ -108,18 +115,18 @@ async def startup_event():
             data = json.load(f)
         if isinstance(data, list):
             ipc_data = data
-            print(f"✅ Loaded {len(ipc_data)} IPC sections")
+            print(f"[OK] Loaded {len(ipc_data)} IPC sections")
         elif isinstance(data, dict):
             ipc_data = [{"section": key, **value} for key, value in data.items()]
-            print(f"✅ Loaded {len(ipc_data)} IPC sections (dict mode)")
+            print(f"[OK] Loaded {len(ipc_data)} IPC sections (dict mode)")
         else:
-            print("⚠️  IPC data format unknown; skipping load")
+            print("[WARN] IPC data format unknown; skipping load")
     except FileNotFoundError as e:
-        print(f"⚠️  Could not load IPC laws (missing): {e}")
+        print(f"[WARN] Could not load IPC laws (missing): {e}")
     except Exception as e:
-        print(f"⚠️  Error reading IPC laws: {e}")
+        print(f"[WARN] Error reading IPC laws: {e}")
 
-    print("🎉 EmpathAI backend ready!")
+    print("[SUCCESS] EmpathAI backend ready!")
 
 
 # Request/Response Models
@@ -153,6 +160,7 @@ async def health_check():
         status="healthy" if models_loaded else "degraded",
         models_loaded=models_loaded
     )
+
 @app.get("/api/test-gemini")
 async def test_gemini():
     """Test Gemini connection and safety settings."""
@@ -160,22 +168,21 @@ async def test_gemini():
         return {"status": "error", "message": "Response generator not initialized"}
     
     try:
-        # Test with a safe message first
         test_message = "I'm feeling stressed about work"
-        result = response_generator.generate(
+        reply, web_enabled = response_generator.generate(
             user_message=test_message,
             emotion="anxiety", 
             is_harassment=False,
-            ore=0.1
+            harassment_score=0.1
         )
         return {
             "status": "success", 
-            "message": "Gemini is working!",
-            "test_response": result
+            "message": "AI Generator is working!",
+            "test_response": reply,
+            "gemini_active": response_generator.available
         }
     except Exception as e:
         return {"status": "error", "message": str(e)}
-
 
 
 @app.post("/api/chat")
@@ -211,7 +218,7 @@ async def chat_endpoint(request: Request):
     try:
         # Step 1: Detect emotion
         emotion_result = emotion_model.detect(user_message)
-        detected_emotion = emotion_result["emotion"]
+        detected_emotion = emotion_result.get("emotion", "neutral")
         
         # Step 2: Detect harassment/toxicity
         harassment_result = harassment_model.detect(user_message)
@@ -230,7 +237,6 @@ async def chat_endpoint(request: Request):
         # Step 3: Generate AI response with conversation memory and optional web search
         ai_text = ""
         web_enabled = False
-        gemini_model = None
 
         # Get conversation history for this user (last 6 turns)
         user_history = conversation_history[user_id][-6:] if user_id in conversation_history else []
@@ -244,11 +250,8 @@ async def chat_endpoint(request: Request):
                 conversation_history=user_history,
                 enable_web=enable_web
             )
-            # Get the model for legal reasoning - use the new attribute name
-            gemini_model = response_generator.model
         else:
-            print("❌ CRITICAL: No response generator loaded!")
-            ai_text = "I'm here to support you. Could you tell me more about how you're feeling?"
+            ai_text = "I'm here to support you. Could you tell me more about how you're feeling? 💜"
         
         # Update conversation history after generating response
         conversation_history[user_id].append(f"User: {user_message}")
@@ -263,26 +266,27 @@ async def chat_endpoint(request: Request):
         
         # Step 4: Log analytics (emotion, harassment, response time)
         if harassment_logger:
-            # Log analytics for all requests
-            harassment_logger.log_analytics(
-                emotion=detected_emotion,
-                harassment_detected=is_harassment,
-                harassment_confidence=harassment_score,
-                response_time_ms=response_time_ms
-            )
-            
-            # Also log as incident if harassment detected
-            if is_harassment:
-                harassment_logger.log_incident(
-                    severity=harassment_score,
+            try:
+                harassment_logger.log_analytics(
                     emotion=detected_emotion,
-                    response_time_ms=response_time_ms,
-                    harassment_detected=True
+                    harassment_detected=is_harassment,
+                    harassment_confidence=harassment_score,
+                    response_time_ms=response_time_ms
                 )
+                
+                if is_harassment:
+                    harassment_logger.log_incident(
+                        severity=harassment_score,
+                        emotion=detected_emotion,
+                        response_time_ms=response_time_ms,
+                        harassment_detected=True
+                    )
+            except Exception as log_err:
+                print(f"[WARN] Incident logging notice: {log_err}")
         
         # Legal reasoning (if harassment Medium/High): match IPC sections by keywords in message
         legal_sections = []
-        if severity_level.lower() in ["medium", "high"] and ipc_data:
+        if (severity_level.lower() in ["medium", "high"] or is_harassment) and ipc_data:
             message_lower = user_message.lower()
             
             # IPC section keywords mapping
@@ -292,15 +296,14 @@ async def chat_endpoint(request: Request):
                 "499": ["defame", "defamation", "reputation", "false", "statement"],
                 "503": ["threat", "threaten", "intimidate", "injury", "alarm"],
                 "504": ["insult", "provoke", "breach", "peace", "intentionally"],
-                "506": ["criminal", "intimidation", "punishment"],
+                "506": ["criminal", "intimidation", "punishment", "kill", "harm"],
                 "509": ["modesty", "woman", "word", "gesture", "insult"]
             }
             
             # Check if message matches IPC section keywords
             matched_sections = []
-            for section_num, keywords in ipc_keywords.items():
-                if any(kw in message_lower for kw in keywords):
-                    # Find the section in ipc_data
+            for section_num, kws in ipc_keywords.items():
+                if any(kw in message_lower for kw in kws):
                     if isinstance(ipc_data, list):
                         section_data = next((law for law in ipc_data if law.get("section") == section_num), None)
                     else:
@@ -313,20 +316,6 @@ async def chat_endpoint(request: Request):
                             matched_sections.append(f"⚖️ IPC Section {section_num}: {title} — {description}")
             
             legal_sections = matched_sections
-            
-            # If no direct match and Gemini is available, ask for suggestion
-            if not legal_sections and gemini_model is not None:
-                try:
-                    law_prompt = (
-                        f"Which Indian IPC sections (354A, 354D, 499, 503, 504, 506, 509) might apply to this situation: '{user_message}'? "
-                        "Respond with only the section number(s) and brief title, e.g., '354A: Sexual harassment'."
-                    )
-                    law_response = gemini_model.generate_content(law_prompt)
-                    suggestion = (law_response.text or "").strip()
-                    if suggestion:
-                        legal_sections.append(f"⚖️ Suggested IPC: {suggestion}")
-                except Exception as law_error:
-                    print(f"⚠️ IPC suggestion error: {law_error}")
 
         # Log message-level interaction per requirement
         try:
@@ -334,10 +323,8 @@ async def chat_endpoint(request: Request):
         except Exception:
             pass
 
-        # Step 5: Format response (new response schema)
-        # Note: Gemini may already include IPC sections in its response, but we append additional ones if found
+        # Step 5: Format response (append IPC laws if relevant and not already in text)
         if legal_sections:
-            # Only append if not already mentioned in ai_text
             for section in legal_sections:
                 section_num = section.split(":")[0].replace("⚖️ IPC Section", "").replace("⚖️ Suggested IPC", "").strip()
                 if section_num not in ai_text:
@@ -347,10 +334,9 @@ async def chat_endpoint(request: Request):
         if severity_level.lower() in ["medium", "high"]:
             try:
                 from utils.notifier import trigger_alert
-
                 trigger_alert(user_id, user_message, severity_level, harassment_score)
             except Exception as alert_error:
-                print(f"⚠️ Alert trigger failed: {alert_error}")
+                print(f"[WARN] Alert trigger notice: {alert_error}")
 
         return {
             "reply": ai_text.strip(),
@@ -421,11 +407,10 @@ async def trigger_support_notification(request: Request):
         if severity_map.get(detected_severity, 0) > severity_map.get(severity, 0):
             final_severity = detected_severity
         
-        # Generate supportive response using Gemini
+        # Generate supportive response
         supportive_text = ""
         if response_generator is not None:
             try:
-                # Generate empathetic response
                 ai_text, _ = response_generator.generate(
                     user_message=f"I received a notification that says: {message}",
                     emotion=detected_emotion,
@@ -436,12 +421,12 @@ async def trigger_support_notification(request: Request):
                 )
                 supportive_text = ai_text
             except Exception as e:
-                print(f"⚠️ Gemini generation failed, using fallback: {e}")
+                print(f"[WARN] Generation notice, using fallback: {e}")
                 supportive_text = get_fallback_support_message(final_severity)
         else:
             supportive_text = get_fallback_support_message(final_severity)
         
-        print(f"📢 Triggered supportive message ({final_severity}): {supportive_text[:100]}...")
+        print(f"[NOTIFICATION] Triggered supportive message ({final_severity}): {supportive_text[:60]}...")
         
         return {
             "reply": supportive_text,
@@ -451,8 +436,7 @@ async def trigger_support_notification(request: Request):
         }
         
     except Exception as e:
-        print(f"❌ Error in trigger-support: {e}")
-        # Return fallback message even on error
+        print(f"Error in trigger-support: {e}")
         return {
             "reply": get_fallback_support_message(severity),
             "severity": severity,
@@ -466,19 +450,19 @@ def get_fallback_support_message(severity: str) -> str:
     if severity == "High":
         return (
             "This sounds extremely serious, and I'm deeply sorry you're going through this. "
-            "Please prioritize your safety. You can reach out to authorities or trusted friends immediately. "
-            "I'm here with you 💜"
+            "Please prioritize your safety. You can reach out to authorities (Emergency: 112, Women Helpline: 1091) or trusted friends immediately. "
+            "I'm right here with you 💜"
         )
     elif severity == "Medium":
         return (
-            "That message sounds really hurtful. I'm here to support you. "
-            "You might want to report or block the person involved. "
+            "That message sounds really hurtful and unacceptable. I'm here to support you. "
+            "You might want to report or block the person involved and keep records of this incident. "
             "You deserve to feel safe and respected 💜"
         )
     else:
         return (
             "I noticed something that might be bothering you. "
-            "Please remember, you're not alone — I'm here to listen 💜"
+            "Please remember, you're not alone — I'm here to listen and help whenever you need 💜"
         )
 
 
@@ -488,7 +472,6 @@ if __name__ == "__main__":
         "app:app",
         host="0.0.0.0",
         port=port,
-        reload=True,
+        reload=False,
         log_level="info"
     )
-
